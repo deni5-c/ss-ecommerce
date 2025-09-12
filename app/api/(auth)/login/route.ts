@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ token });
     } catch (error) {
-        console.log("[USER_POST]", error);
+        console.log("[LOGIN_POST]", error);
         return new NextResponse("Internal error", { status: 500 });
     }
 }
