@@ -8,10 +8,6 @@ export async function GET(request: Request) {
     const isUppercase = searchParams.get("isUppercase") === "true";
     let name = searchParams.get("name");
 
-    if (isUppercase && name) {
-      name = upperCasePipe(name);
-    }
-
     let users = await prismadb.user.findMany({
       where: name
         ? {
