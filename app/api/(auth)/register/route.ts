@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
-import prismadb from "@/lib/prismadb";
 import bcrypt from "bcryptjs";
+
+import prismadb from "@/lib/prismadb";
+import { validationPipe } from "@/lib/pipes";
+import { UserSchema, UserType } from "@/dto/user.dto";
+import { error } from "console";
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { name, email, password, role } = body;
+        const validate = await validationPipe<UserType>(UserSchema, body)
+        const { name, email, password, role } = validate;
+
+        console.log(validate.error);
 
         if (!name) {
             return new NextResponse("Name is required", { status: 400 });
@@ -17,7 +24,7 @@ export async function POST(req: Request) {
 
         if (!password) {
             return new NextResponse("Password is required", { status: 400 });
-        }
+        }        
 
         let user;
 
