@@ -1,23 +1,13 @@
 import { NextResponse } from "next/server";
-import prismadb from "@/lib/prismadb";
 import bcrypt from "bcryptjs";
+import prismadb from "@/lib/prismadb";
+import { validationPipe } from "@/lib/pipes";
+import { RegisterUserDTO, RegisterUserSchema } from "@/dto/user.dto";
 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { name, email, password, role } = body;
-
-        if (!name) {
-            return new NextResponse("Name is required", { status: 400 });
-        }
-
-        if (!email) {
-            return new NextResponse("Email is required", { status: 400 });
-        }
-
-        if (!password) {
-            return new NextResponse("Password is required", { status: 400 });
-        }
+        const { name, email, password, role } = await validationPipe<RegisterUserDTO>(RegisterUserSchema, body);
 
         let user;
 
@@ -44,6 +34,10 @@ export async function POST(req: Request) {
 
         return NextResponse.json({ message: "User created", user });
     } catch (error) {
+        if (error instanceof Error) {
+            return new NextResponse(error.message, { status: 400 });
+        }
+
         console.log("[REGISTER_POST]", error);
         return new NextResponse("Internal error", { status: 500 });
     }
