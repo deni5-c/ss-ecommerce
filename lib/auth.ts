@@ -12,10 +12,10 @@ export type PayLoad = {
 };
 
 export function requireAuth(
-    request: Request, 
+    req: Request, 
     roles?: Role[]
 ): PayLoad | NextResponse {
-    const authHeader = request.headers.get("authorization");
+    const authHeader = req.headers.get("authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return new NextResponse("Unauthorized", { status: 401 });

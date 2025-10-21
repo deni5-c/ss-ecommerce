@@ -1,3 +1,6 @@
+import { CreateStoreDTO, CreateStoreSchema } from "@/dto/store.dto";
+import { requireAuth } from "@/lib/auth";
+import { validationPipe } from "@/lib/pipes";
 import prismadb from "@/lib/prismadb";
 import { NextResponse } from "next/server";
 
@@ -5,33 +8,29 @@ export async function POST(
     req: Request
 ) {
     try {
+        const auth = requireAuth(req);
         const body = await req.json();
-        const { 
-            name,
-            userId,
-            address, 
-        } = body;
 
-        const missingFields = [];
-        if (!name) missingFields.push("Name");
-        if (!userId) missingFields.push("User ID");
-        if (!address) missingFields.push("Address");
-        if (missingFields.length > 0) {
-            return new NextResponse(
-                `${missingFields.join(", ")} ${missingFields.length === 1 ? "is" : "are"} required`,
-                { status: 400 }
-            );
+        if (auth instanceof NextResponse) {
+            return auth;
         }
-        console.log(name, userId, address);
+
+        const { id: userId } = auth;
+        const { name, address } = await validationPipe<CreateStoreDTO>(CreateStoreSchema, body);
+
+        if (!userId) {
+            return new NextResponse("Unauthorized", { status: 401 });
+        }
 
         const store = await prismadb.store.create({
             data: {
                 name,
                 userId,
-                address
-            }
-        })
-    
+                address,
+            },
+        });
+
+        return NextResponse.json({ message: "Store created", store });
     } catch (error) {
         console.log("[STORE_POST]", error);
         return new NextResponse("Internal error", { status: 500 });
