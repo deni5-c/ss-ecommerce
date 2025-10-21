@@ -32,7 +32,23 @@ export async function POST(
 
         return NextResponse.json({ message: "Store created", store });
     } catch (error) {
+        if (error instanceof Error) {
+            return new NextResponse(error.message, { status: 400 });
+        }
+
         console.log("[STORE_POST]", error);
+        return new NextResponse("Internal error", { status: 500 });
+    }
+}
+
+export async function GET(
+    req: Request
+) {
+    try {
+        const stores = await prismadb.store.findMany();
+        return NextResponse.json(stores);
+    } catch (error) {
+        console.log("[STORE_GET]", error);
         return new NextResponse("Internal error", { status: 500 });
     }
 }
