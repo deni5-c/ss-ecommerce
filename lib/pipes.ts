@@ -16,4 +16,19 @@ export function upperCasePipe(value: unknown): string {
   return String(value ?? "");
 }
 
+export function validateCsvFile(file: File) {
+  if (!file) throw new Error("No file uploaded.");
+
+  if (file.type !== "text/csv" && !file.name.endsWith(".csv")) {
+    throw new Error("Invalid file type. Only CSV is allowed.");
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    throw new Error("File too large. Max 2MB.");
+  }
+
+  return true;
+}
+
+
 
